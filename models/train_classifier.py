@@ -21,7 +21,7 @@ from sklearn.linear_model import LogisticRegression
 
 
 def load_data(database_filepath):
-    engine = create_engine('sqlite:///database.db')
+    engine = create_engine('sqlite:////data/DisasterResponse.db')
     df = pd.read_sql_table(database_filepath, engine)
     X = df.message.values
     Y = df.drop(['id', 'message', 'original', 'genre'], axis = 1)
