@@ -21,11 +21,13 @@ from sklearn.linear_model import LogisticRegression
 
 
 def load_data(database_filepath):
-    engine = create_engine('sqlite:////data/DisasterResponse.db')
-    df = pd.read_sql_table(database_filepath, engine)
+    engine = create_engine('sqlite:///' + database_filepath, echo = True)
+    df = pd.read_sql_table(database_filepath, con = engine)
     X = df.message.values
     Y = df.drop(['id', 'message', 'original', 'genre'], axis = 1)
     category_names = list(Y.columns)
+
+    return X, Y, category_names
 
 
 def tokenize(text):
@@ -47,12 +49,15 @@ def build_model():
         ('clf', MultiOutputClassifier(RandomForestClassifier()))
     ])
     
-    X_train, X_test, y_train, y_test = train_test_split(X, Y)
-    pipeline.fit(X_train, y_train)
+    return pipeline
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
-    pass
+    Y_pred = model.predict(X_test)
+    for col in range(36):
+        print(Y_test.columns[col])
+        print(classification_report(Y_test.iloc[:,col], Y_pred[:,col]))
+        print('-----------------------------------------------------')
 
 
 def save_model(model, model_filepath):
