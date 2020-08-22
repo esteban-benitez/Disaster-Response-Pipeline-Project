@@ -37,8 +37,11 @@ def clean_data(df):
     
 
 def save_data(df, database_filename):
-    engine = create_engine('sqlite:///' + database_filename, echo = False)
-    df.to_sql(database_filename, con = engine, index=False)  
+    try:
+        engine = create_engine('sqlite:///' + database_filename, echo = False)
+        df.to_sql(database_filename, con = engine, index=False)
+    except:
+        print("Database created")
 
 
 def main():
