@@ -40,8 +40,8 @@ def index():
     
     # extract data needed for visuals
     # TODO: Below is an example - modify to extract data for your own visuals
-    print(df)
-    genre_counts = df.nunique().count()
+    
+    genre_counts = df.drop(['id', 'message', 'original', 'genre'], axis = 1).sum()
     genre_names = list(genre_counts.index)
     
     # create visuals
