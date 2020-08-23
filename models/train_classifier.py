@@ -21,17 +21,23 @@ from sklearn.linear_model import LogisticRegression
 
 
 def load_data(database_filepath):
+
+    """load_data(database_filepath) returns X, Y, category_names after .db file is loaded to pandas DataFrame"""
+
     engine = create_engine('sqlite:///' + database_filepath, echo = False)
 
     df = pd.read_sql_table(database_filepath, con = engine)
     X = df.message.values
     Y = df.drop(['id', 'message', 'original', 'genre'], axis = 1)
     category_names = list(Y.columns)
-    print("Y: ", Y)
+
     return X, Y, category_names
 
 
 def tokenize(text):
+
+    """tokenize(text) method utilized to split a given text into individual words"""
+
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
     
@@ -44,6 +50,9 @@ def tokenize(text):
 
 
 def build_model():
+
+    """creates a Pipeline() object containing CountVectorizer, TfidfTransformer(), and RandomForestClassifier(), returns the Pipeline() object"""
+
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
@@ -54,6 +63,9 @@ def build_model():
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
+
+    """evaluate_model(model, X_test, Y_test, category_names) and prints the classification_report"""
+
     Y_pred = model.predict(X_test)
     for col in range(36):
         print(Y_test.columns[col])
@@ -62,11 +74,17 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 
 def save_model(model, model_filepath):
+
+    """save_model(model, model_filepath) as a pickle file"""
+
     with open(model_filepath, 'wb') as f:
         pickle.dump(model, f)
 
 
 def main():
+    
+    """ static main() method utilized to initialize ML Pipeline """
+
     if len(sys.argv) == 3:
         database_filepath, model_filepath = sys.argv[1:]
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))

@@ -4,6 +4,9 @@ import numpy as np
 from sqlalchemy import create_engine
 
 def load_data(messages_filepath, categories_filepath):
+
+    """load_data(message_filepath, categories_filepath) merges two files, and returns as pandas DataFrame"""
+
     messages = pd.read_csv(messages_filepath)
     categories = pd.read_csv(categories_filepath)
     df = messages.merge(categories, how = 'outer', on = 'id')
@@ -11,6 +14,9 @@ def load_data(messages_filepath, categories_filepath):
 
 
 def clean_data(df):
+
+    """clean_data(DataFrame) returns any DataFrame after data is prcessed for specific cleansing rules"""
+
     categories = df.categories.str.split(';', expand = True)
     # select the first row of the categories dataframe
     row = categories.iloc[1]
@@ -38,6 +44,7 @@ def clean_data(df):
     
 
 def save_data(df, database_filename):
+    """"save_data(df, database_filename) method used to store a Pandas dataframe in SQLite3 database file."""
     try:
         engine = create_engine('sqlite:///' + database_filename, echo = False)
         df.to_sql(database_filename, con = engine, index=False)
@@ -46,6 +53,7 @@ def save_data(df, database_filename):
 
 
 def main():
+    """Static main() method to initialize ETL pipeline"""
     if len(sys.argv) == 4:
 
         messages_filepath, categories_filepath, database_filepath = sys.argv[1:]
