@@ -15,6 +15,7 @@ from sqlalchemy import create_engine
 app = Flask(__name__)
 
 def tokenize(text):
+    """utilizes nltk.tokenize method word_tokenize(text) and returns the tokens as a list"""
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
 
@@ -37,6 +38,7 @@ model = joblib.load("../models/classifier.pkl")
 @app.route('/')
 @app.route('/index')
 def index():
+    """non returning function creating the plotly visual utilized on index.html page"""
     
     # extract data needed for visuals
     # TODO: Below is an example - modify to extract data for your own visuals
@@ -75,9 +77,9 @@ def index():
     return render_template('master.html', ids=ids, graphJSON=graphJSON)
 
 
-# web page that handles user query and displays model results
 @app.route('/go')
 def go():
+    """web page that handles user query and displays model results, returns render_template()"""
     # save user input in query
     query = request.args.get('query', '') 
 
@@ -94,6 +96,7 @@ def go():
 
 
 def main():
+    """main method"""
     app.run(host='0.0.0.0', port=3001, debug=True)
 
 
