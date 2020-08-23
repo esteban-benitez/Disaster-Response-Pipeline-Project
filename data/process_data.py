@@ -20,7 +20,7 @@ def clean_data(df):
     # up to the second to last character of each string with slicing
     category_colnames = row.apply(lambda x: x[slice(0, len(x) - 2)])
     categories.columns = category_colnames
-    
+    #print(df.head())
     for column in categories:
         categories[column].astype(str)
         # set each value to be the last character of the string
@@ -28,12 +28,13 @@ def clean_data(df):
     
         # convert column from string to numeric
         categories[column] = categories[column].astype(int)
-        # drop the original categories column from `df`
-        df.drop(columns = ['categories'], axis = 1, inplace = True)
-        df = pd.concat([df, categories], axis = 1)
-        df.drop_duplicates(subset = ['original'], inplace = True)
         
-        return df
+    # drop the original categories column from `df`
+    df.drop(columns = ['categories'], axis = 1, inplace = True)
+    df = pd.concat([df, categories], axis = 1)
+    df.drop_duplicates(subset = ['original'], inplace = True)
+    #print(df.columns)
+    return df
     
 
 def save_data(df, database_filename):

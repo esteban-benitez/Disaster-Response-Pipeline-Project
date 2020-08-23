@@ -21,12 +21,13 @@ from sklearn.linear_model import LogisticRegression
 
 
 def load_data(database_filepath):
-    engine = create_engine('sqlite:///' + database_filepath, echo = True)
+    engine = create_engine('sqlite:///' + database_filepath, echo = False)
+
     df = pd.read_sql_table(database_filepath, con = engine)
     X = df.message.values
     Y = df.drop(['id', 'message', 'original', 'genre'], axis = 1)
     category_names = list(Y.columns)
-
+    print("Y: ", Y)
     return X, Y, category_names
 
 
@@ -44,7 +45,7 @@ def tokenize(text):
 
 def build_model():
     pipeline = Pipeline([
-        ('vect', CountVectorizer()),
+        ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
         ('clf', MultiOutputClassifier(RandomForestClassifier()))
     ])
@@ -69,6 +70,9 @@ def main():
         database_filepath, model_filepath = sys.argv[1:]
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))
         X, Y, category_names = load_data(database_filepath)
+        print('X: ', X)
+        print('Y: ', Y)
+        print("category_names: ", category_names)
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
         
         print('Building model...')
