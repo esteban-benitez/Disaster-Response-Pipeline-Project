@@ -18,6 +18,9 @@ from sklearn.multioutput import MultiOutputClassifier
 from sklearn.cluster import DBSCAN
 from sklearn.feature_selection import SelectFromModel
 from sklearn.linear_model import LogisticRegression
+from pprint import pprint
+from time import time
+import logging
 
 
 def load_data(database_filepath):
@@ -80,6 +83,33 @@ def save_model(model, model_filepath):
     with open(model_filepath, 'wb') as f:
         pickle.dump(model, f)
 
+def gridSearch(pipeline, X_train, Y_train):
+    parameters = {
+        'vect__ngram_range': ((1, 2), (1, 3)),
+        'clf__estimator__criterion': ['gini', 'entropy'],
+        'tfidf__smooth_idf': [True, False],
+        'tfidf__sublinear_tf': [True, False],
+        'vect__max_features': [1, 5, 10],
+        'clf__estimator__n_estimators': [1, 3, 10]
+    }
+
+    cv = GridSearchCV(pipeline, param_grid=parameters)
+
+    print("pipeline:", [name for name, _ in pipeline.steps])
+    print("parameters:")
+    pprint(parameters)
+    t0 = time()
+    cv.fit(X_train, Y_train)
+    print("done in %0.3fs" % (time() - t0))
+    print()
+
+    print("Best score: %0.3f" % cv.best_score_)
+    print("Best parameters set:")
+    best_parameters = cv.best_estimator_.get_params()
+    for param_name in sorted(parameters.keys()):
+        print("\t%s: %r" % (param_name, best_parameters[param_name]))
+    
+
 
 def main():
     
@@ -102,6 +132,9 @@ def main():
         
         print('Evaluating model...')
         evaluate_model(model, X_test, Y_test, category_names)
+
+        print('Grid Searching hyperparameters...')
+        gridSearch(build_model(), X_train, Y_train)
 
         print('Saving model...\n    MODEL: {}'.format(model_filepath))
         save_model(model, model_filepath)
