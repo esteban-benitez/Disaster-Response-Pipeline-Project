@@ -66,6 +66,24 @@ def index():
                     'title': "Genre"
                 }
             }
+        },
+        {
+            'data': [
+                Bar(
+                    x=[0,1,4],
+                    y=[4,2,1]
+                )
+            ],
+
+            'layout': {
+                'title': 'myTitle',
+                'yaxis': {
+                    'title': 'y-label'
+                },
+                'xaxis': {
+                    'title': 'xlabel'
+                }
+            }
         }
     ]
     
