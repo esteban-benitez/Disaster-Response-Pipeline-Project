@@ -1,6 +1,7 @@
 import json
 import plotly
 import pandas as pd
+import numpy as np
 
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
@@ -8,8 +9,13 @@ from nltk.tokenize import word_tokenize
 from flask import Flask
 from flask import render_template, request, jsonify
 from plotly.graph_objs import Bar
+from plotly.graph_objects import Scatter
 import joblib
 from sqlalchemy import create_engine
+from sklearn.feature_extraction.text import CountVectorizer
+import nltk
+from nltk.corpus import stopwords
+nltk.download('stopwords')
 
 
 app = Flask(__name__)
@@ -29,10 +35,33 @@ def tokenize(text):
 # load data
 engine = create_engine('sqlite:///../data/DisasterResponse.db')
 df = pd.read_sql_table('data/DisasterResponse.db', engine)
+cv = CountVectorizer()
+text_data = []
+for each in df.message:
+    text_data.append(each)
+d = cv.fit_transform(text_data)
+scatter_x = pd.Series(cv.get_feature_names())
+scatter_y = pd.DataFrame(d.toarray())
+#print(scatter_x)
+#print("TEST: ", scatter_y.sum(axis=0))
+scatter_y = scatter_y.sum(axis=0)
+count = 0
+Final_DF = pd.DataFrame(data = scatter_y, index = scatter_x, columns = ['count'])
+count = 0
+for each in scatter_y:
+    Final_DF.iloc[count, 0] = each
+    count += 1
+
+df3 = Final_DF.sort_values(by=['count'], ascending=False).head(35)
+x_2 = df3.index
+y_2 = df3['count']
+
+#print('Y: ', scatter_y)
+#new_df = pd.concat([scatter_x, scatter_y])
+#print(new_df.dropna())
 
 # load model
 model = joblib.load("../models/classifier.pkl")
-
 
 # index webpage displays cool visuals and receives user input text for model
 @app.route('/')
@@ -70,18 +99,19 @@ def index():
         {
             'data': [
                 Bar(
-                    x=[0,1,4],
-                    y=[4,2,1]
+                    x=y_2,
+                    y=x_2,
+                    orientation = 'h'
                 )
             ],
 
             'layout': {
-                'title': 'myTitle',
+                'title': 'Top Frequency Words',
                 'yaxis': {
-                    'title': 'y-label'
+                    'title': 'Count'
                 },
                 'xaxis': {
-                    'title': 'xlabel'
+                    'title': 'word-token'
                 }
             }
         }
@@ -102,7 +132,7 @@ def go():
     query = request.args.get('query', '') 
 
     # use model to predict classification for query
-    classification_labels = model.predict([query])[0]
+    classification_labels = model.predict(tokenize([query]))[0]
     classification_results = dict(zip(df.columns[4:], classification_labels))
 
     # This will render the go.html Please see that file. 
